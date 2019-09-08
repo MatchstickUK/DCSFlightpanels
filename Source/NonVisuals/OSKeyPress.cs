@@ -66,7 +66,7 @@ namespace NonVisuals
          * depends on what the user has configured.
          * It is the binding class that must make sure to set these.
          */
-        private List<OSKeyPress> _negatorOSKeyPresses = new List<OSKeyPress>(); 
+        private List<OSKeyPress> _negatorOSKeyPresses = new List<OSKeyPress>();
 
         public OSKeyPress() { }
 
@@ -236,7 +236,7 @@ namespace NonVisuals
 
             while (keyPressLengthTimeConsumed < (int)keyPressLength)
             {
-//Debug.WriteLine("VK = " + virtualKeyCodes[1] + " length = " + keyPressLength);
+                //Debug.WriteLine("VK = " + virtualKeyCodes[1] + " length = " + keyPressLength);
                 //Press modifiers
                 for (var i = 0; i < virtualKeyCodes.Count(); i++)
                 {
@@ -266,8 +266,6 @@ namespace NonVisuals
                     }
                 }
 
-
-                
                 if (keyPressLength != KeyPressLength.Indefinite)
                 {
                     Thread.Sleep(50);
@@ -277,35 +275,7 @@ namespace NonVisuals
                 {
                     Thread.Sleep(20);
                 }
-
-                //Release normal keys
-                for (var i = 0; i < virtualKeyCodes.Count(); i++)
-                {
-                    var virtualKeyCode = virtualKeyCodes[i];
-                    if (!CommonVK.IsModifierKey(virtualKeyCode))
-                    {
-                        NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)NativeMethods.KEYEVENTF_KEYUP, 0);
-                    }
-                }
-
-                //Release modifiers
-                for (var i = 0; i < virtualKeyCodes.Count(); i++)
-                {
-                    var virtualKeyCode = virtualKeyCodes[i];
-                    if (CommonVK.IsModifierKey(virtualKeyCode))
-                    {
-                        Common.DebugP(Enum.GetName(typeof(VirtualKeyCode), virtualKeyCode) + " is MODIFIER = " + CommonVK.IsExtendedKey(virtualKeyCode));
-                        if (CommonVK.IsExtendedKey(virtualKeyCode))
-                        {
-                            NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)(NativeMethods.KEYEVENTF_EXTENDEDKEY | NativeMethods.KEYEVENTF_KEYUP), 0);
-                        }
-                        else
-                        {
-                            NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)NativeMethods.KEYEVENTF_KEYUP, 0);
-                        }
-                    }
-                }
-
+                
                 if (DoAbortThread())
                 {
                     ResetAbortThreadState();
@@ -314,6 +284,42 @@ namespace NonVisuals
                 }
             }
 
+            if (keyPressLength == KeyPressLength.Indefinite)
+            {
+                ReleaseKeys(virtualKeyCodes);
+            }
+
+        }
+
+        private void ReleaseKeys(VirtualKeyCode[] virtualKeyCodes)
+        {
+            //Release normal keys
+            for (var i = 0; i < virtualKeyCodes.Count(); i++)
+            {
+                var virtualKeyCode = virtualKeyCodes[i];
+                if (!CommonVK.IsModifierKey(virtualKeyCode))
+                {
+                    NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)NativeMethods.KEYEVENTF_KEYUP, 0);
+                }
+            }
+
+            //Release modifiers
+            for (var i = 0; i < virtualKeyCodes.Count(); i++)
+            {
+                var virtualKeyCode = virtualKeyCodes[i];
+                if (CommonVK.IsModifierKey(virtualKeyCode))
+                {
+                    Common.DebugP(Enum.GetName(typeof(VirtualKeyCode), virtualKeyCode) + " is MODIFIER = " + CommonVK.IsExtendedKey(virtualKeyCode));
+                    if (CommonVK.IsExtendedKey(virtualKeyCode))
+                    {
+                        NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)(NativeMethods.KEYEVENTF_EXTENDEDKEY | NativeMethods.KEYEVENTF_KEYUP), 0);
+                    }
+                    else
+                    {
+                        NativeMethods.keybd_event((byte)virtualKeyCode, (byte)NativeMethods.MapVirtualKey((uint)virtualKeyCode, 0), (int)NativeMethods.KEYEVENTF_KEYUP, 0);
+                    }
+                }
+            }
         }
 
         public string GetVirtualKeyCodesAsString(KeyPressInfo keyPressInfo)
@@ -694,4 +700,3 @@ namespace NonVisuals
 
 
 }
-
